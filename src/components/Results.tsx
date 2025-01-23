@@ -2,7 +2,7 @@ import React from 'react';
 
 interface ResultsProps {
   score: number;
-  wpm: number;
+  wpm?: number;
   onRestart: () => void;
 }
 
@@ -12,7 +12,7 @@ const Results: React.FC<ResultsProps> = ({ score, wpm, onRestart }) => {
       <h2 className="text-4xl font-bold mb-4">Time's Up!</h2>
       <div className="space-y-2">
         <p className="text-2xl">Score: {score}</p>
-        <p className="text-2xl">Words per minute: {wpm}</p>
+        {wpm !== undefined && <p className="text-2xl">Words per minute: {wpm}</p>}
       </div>
       <button
         onClick={onRestart}

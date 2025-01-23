@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import TimerSelector from '../components/TimerSelector';
 import WordDisplay from '../components/WordDisplay';
 import Results from '../components/Results';
+import EndlessMode from '../components/EndlessMode';
 
 const WORDS = [
   "a", "about", "all", "also", "and", "as", "at", "be", "because", "but", "by",
@@ -26,6 +27,7 @@ const Index = () => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [gameOver, setGameOver] = useState(false);
   const [totalWords, setTotalWords] = useState(0);
+  const [isEndlessMode, setIsEndlessMode] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const getRandomWord = useCallback(() => {
@@ -33,14 +35,15 @@ const Index = () => {
     return WORDS[randomIndex];
   }, []);
 
-  const startGame = useCallback(() => {
+  const startGame = useCallback((endless: boolean = false) => {
     setCurrentWord(getRandomWord());
     setInput("");
     setScore(0);
-    setTimeLeft(selectedTime * 60);
+    setTimeLeft(endless ? 10 : selectedTime * 60);
     setIsPlaying(true);
     setGameOver(false);
     setTotalWords(0);
+    setIsEndlessMode(endless);
     inputRef.current?.focus();
   }, [selectedTime, getRandomWord]);
 
@@ -60,11 +63,13 @@ const Index = () => {
     const value = e.target.value;
     setInput(value);
 
-    if (value === currentWord) {
-      setScore((prev) => prev + 1);
-      setTotalWords((prev) => prev + 1);
-      setCurrentWord(getRandomWord());
-      setInput("");
+    if (!isEndlessMode) {
+      if (value === currentWord) {
+        setScore((prev) => prev + 1);
+        setTotalWords((prev) => prev + 1);
+        setCurrentWord(getRandomWord());
+        setInput("");
+      }
     }
   };
 
@@ -77,26 +82,49 @@ const Index = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <h1 className="text-5xl font-bold mb-12">TypeHero</h1>
-        <TimerSelector selectedTime={selectedTime} onTimeSelect={setSelectedTime} />
-        <button
-          onClick={startGame}
-          className="px-6 py-3 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          Start Game
-        </button>
+        <div className="space-y-8">
+          <TimerSelector selectedTime={selectedTime} onTimeSelect={setSelectedTime} />
+          <div className="flex flex-col gap-4">
+            <button
+              onClick={() => startGame(false)}
+              className="px-6 py-3 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+            >
+              Start Timed Game
+            </button>
+            <button
+              onClick={() => startGame(true)}
+              className="px-6 py-3 rounded-md border-2 border-[#ea384c] text-[#ea384c] hover:bg-[#ea384c]/10 transition-colors"
+            >
+              Start Endless Mode
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
 
-  if (gameOver) {
+  if (gameOver && !isEndlessMode) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4">
         <Results
           score={score}
           wpm={calculateWPM()}
-          onRestart={startGame}
+          onRestart={() => startGame(false)}
         />
       </div>
+    );
+  }
+
+  if (isEndlessMode) {
+    return (
+      <EndlessMode
+        initialWord={currentWord}
+        onGameOver={(finalScore) => {
+          setScore(finalScore);
+          setGameOver(true);
+          setIsPlaying(false);
+        }}
+      />
     );
   }
 
