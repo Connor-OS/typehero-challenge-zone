@@ -24,7 +24,7 @@ const EndlessMode: React.FC<EndlessModeProps> = ({ initialWord, onGameOver }) =>
   const [words, setWords] = useState<string[]>([initialWord]);
   const [input, setInput] = useState("");
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(10);
+  const [timeLeft, setTimeLeft] = useState(5);
   const [round, setRound] = useState(1);
   const [wordsInRound, setWordsInRound] = useState(0);
 
@@ -61,7 +61,7 @@ const EndlessMode: React.FC<EndlessModeProps> = ({ initialWord, onGameOver }) =>
       setTimeLeft((prev) => prev + 10);
       setWordsInRound((prev) => {
         const newWordsInRound = prev + 1;
-        if (newWordsInRound >= 10) {
+        if (newWordsInRound >= 5) {
           setRound((prevRound) => prevRound + 1);
           return 0;
         }
